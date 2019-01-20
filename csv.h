@@ -73,16 +73,16 @@ namespace io{
                                 std::memset(file_name, 0, sizeof(file_name));
                         }
                        
-                        void set_file_name(const char*file_name){
+                        void set_file_name(const wchar_t*file_name){
                                 if(file_name != nullptr){
-                                        strncpy(this->file_name, file_name, sizeof(this->file_name));
+									    wcsncpy(this->file_name, file_name, sizeof(this->file_name)/sizeof(this->file_name[0]));
                                         this->file_name[sizeof(this->file_name)-1] = '\0';
                                 }else{
                                         this->file_name[0] = '\0';
                                 }
                         }
 
-                        char file_name[max_file_name_length+1];
+                        wchar_t file_name[max_file_name_length+1];
                 };
 
                 struct with_file_line{
@@ -327,13 +327,13 @@ namespace io{
                 int data_begin;
                 int data_end;
 
-                char file_name[error::max_file_name_length+1];
+                wchar_t file_name[error::max_file_name_length+1];
                 unsigned file_line;
 
-                static std::unique_ptr<ByteSourceBase> open_file(const char*file_name){
+                static std::unique_ptr<ByteSourceBase> open_file(const wchar_t*file_name){
                         // We open the file in binary mode as it makes no difference under *nix
                         // and under Windows we handle \r\n newlines ourself.
-                        FILE*file = std::fopen(file_name, "rb");
+                        FILE*file = _wfopen(file_name, L"rb");
                         if(file == 0){
                                 int x = errno; // store errno as soon as possible, doing it after constructor call can fail.
                                 error::can_not_open_file err;
@@ -366,70 +366,70 @@ namespace io{
                 LineReader(const LineReader&) = delete;
                 LineReader&operator=(const LineReader&) = delete;
 
-                explicit LineReader(const char*file_name){
+                explicit LineReader(const wchar_t*file_name){
                         set_file_name(file_name);
                         init(open_file(file_name));
                 }
 
-                explicit LineReader(const std::string&file_name){
+                explicit LineReader(const std::wstring&file_name){
                         set_file_name(file_name.c_str());
                         init(open_file(file_name.c_str()));
                 }
 
-                LineReader(const char*file_name, std::unique_ptr<ByteSourceBase>byte_source){
+                LineReader(const wchar_t*file_name, std::unique_ptr<ByteSourceBase>byte_source){
                         set_file_name(file_name);
                         init(std::move(byte_source));
                 }
 
-                LineReader(const std::string&file_name, std::unique_ptr<ByteSourceBase>byte_source){
+                LineReader(const std::wstring&file_name, std::unique_ptr<ByteSourceBase>byte_source){
                         set_file_name(file_name.c_str());
                         init(std::move(byte_source));
                 }
 
-                LineReader(const char*file_name, const char*data_begin, const char*data_end){
+                LineReader(const wchar_t*file_name, const char*data_begin, const char*data_end){
                         set_file_name(file_name);
                         init(std::unique_ptr<ByteSourceBase>(new detail::NonOwningStringByteSource(data_begin, data_end-data_begin)));
                 }
 
-                LineReader(const std::string&file_name, const char*data_begin, const char*data_end){
+                LineReader(const std::wstring&file_name, const char*data_begin, const char*data_end){
                         set_file_name(file_name.c_str());
                         init(std::unique_ptr<ByteSourceBase>(new detail::NonOwningStringByteSource(data_begin, data_end-data_begin)));
                 }
 
-                LineReader(const char*file_name, FILE*file){
+                LineReader(const wchar_t*file_name, FILE*file){
                         set_file_name(file_name);
                         init(std::unique_ptr<ByteSourceBase>(new detail::OwningStdIOByteSourceBase(file)));
                 }
 
-                LineReader(const std::string&file_name, FILE*file){
+                LineReader(const std::wstring&file_name, FILE*file){
                         set_file_name(file_name.c_str());
                         init(std::unique_ptr<ByteSourceBase>(new detail::OwningStdIOByteSourceBase(file)));
                 }
 
-                LineReader(const char*file_name, std::istream&in){
+                LineReader(const wchar_t*file_name, std::istream&in){
                         set_file_name(file_name);
                         init(std::unique_ptr<ByteSourceBase>(new detail::NonOwningIStreamByteSource(in)));
                 }
 
-                LineReader(const std::string&file_name, std::istream&in){
+                LineReader(const std::wstring&file_name, std::istream&in){
                         set_file_name(file_name.c_str());
                         init(std::unique_ptr<ByteSourceBase>(new detail::NonOwningIStreamByteSource(in)));
                 }
 
-                void set_file_name(const std::string&file_name){
+                void set_file_name(const std::wstring&file_name){
                         set_file_name(file_name.c_str());
                 }
 
-                void set_file_name(const char*file_name){
+                void set_file_name(const wchar_t*file_name){
                         if(file_name != nullptr){
-                                strncpy(this->file_name, file_name, sizeof(this->file_name));
+							    wcsncpy(this->file_name, file_name, sizeof(this->file_name)/sizeof(this->file_name[0]));
                                 this->file_name[sizeof(this->file_name)-1] = '\0';
                         }else{
                                 this->file_name[0] = '\0';
                         }
                 }
 
-                const char*get_truncated_file_name()const{
+                const wchar_t*get_truncated_file_name()const{
                         return file_name;
                 }
 
@@ -1188,11 +1188,11 @@ namespace io{
                                 - std::begin(column_names));
                 }
 
-                void set_file_name(const std::string&file_name){
+                void set_file_name(const std::wstring&file_name){
                         in.set_file_name(file_name);
                 }
 
-                void set_file_name(const char*file_name){
+                void set_file_name(const wchar_t*file_name){
                         in.set_file_name(file_name);
                 }
 
